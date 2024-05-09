@@ -1,2 +1,89 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+import csv
+
+def read_game_data(file_path):
+    """
+    Function to read game data from a CSV file.
+
+    Parameters:
+    - file_path: Path to the CSV file containing game data.
+
+    Returns:
+    - A list of dictionaries, where each dictionary represents a game.
+    """
+    games = []
+
+    try:
+        with open(file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                games.append(row)
+    except FileNotFoundError:
+        print("Error: File not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    return games
+
+def recommend_games(preferred_genre, preferred_platform, min_score, games):
+    """
+    Function to recommend games based on user preferences.
+
+    Parameters:
+    - preferred_genre: User's preferred game genre.
+    - preferred_platform: User's preferred gaming platform.
+    - min_score: Minimum review score desired by the user.
+    - games: List of dictionaries containing game data.
+
+    Returns:
+    - A list of dictionaries representing recommended games.
+    """
+    recommended_games = []
+
+    try:
+        for game in games:
+            genres = game["Metadata.Genres"].split(",")
+            platforms = game["Release.Console"].split(",")
+            if (preferred_genre.lower() in [genre.lower() for genre in genres] 
+                and preferred_platform.lower() in [platform.lower() for platform in platforms]
+                and int(game["Metrics.Review Score"]) >= min_score):
+                recommended_games.append(game)
+    except KeyError:
+        print("Error: Invalid data format in the CSV file.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    return recommended_games
+
+def main():
+    """
+    Main function to orchestrate the program flow.
+    """
+    print("Welcome to Game Recommender!")
+
+    file_path = "video_games.csv"
+    games = read_game_data(file_path)
+
+    if not games:
+        print("Failed to read game data. Please make sure the file exists and is formatted correctly.")
+        return
+
+    try:
+        genre = input("What genre of games do you like? ")
+        platform = input("What platform do you play on? ")
+        min_score = int(input("What minimum review score would you like the game to have? "))
+
+        recommended_games = recommend_games(genre, platform, min_score, games)
+
+        if recommended_games:
+            print("Based on your preferences, we recommend the following games:")
+            for game in recommended_games:
+                print(f"{game['Title']} - Genres: {game['Metadata.Genres']} - Platforms: {game['Release.Console']} - Review Score: {game['Metrics.Review Score']}")
+        else:
+            print("Sorry, we couldn't find any games matching your preferences.")
+    except ValueError:
+        print("Error: Please enter a valid number for the minimum review score.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
