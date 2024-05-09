@@ -24,7 +24,7 @@ def read_game_data(file_path):
 
     return games
 
-def recommend_games(preferred_genre, preferred_platform, min_score, games):
+def recommend_games(preferred_genre, preferred_platform, min_score, preferred_publisher, games):
     """
     Function to recommend games based on user preferences.
 
@@ -32,6 +32,7 @@ def recommend_games(preferred_genre, preferred_platform, min_score, games):
     - preferred_genre: User's preferred game genre.
     - preferred_platform: User's preferred gaming platform.
     - min_score: Minimum review score desired by the user.
+    - preferred_publisher: User's preferred licensing company.
     - games: List of dictionaries containing game data.
 
     Returns:
@@ -43,8 +44,10 @@ def recommend_games(preferred_genre, preferred_platform, min_score, games):
         for game in games:
             genres = game["Metadata.Genres"].split(",")
             platforms = game["Release.Console"].split(",")
+            publishers = game["Metadata.Publishers"].split(",")
             if (preferred_genre.lower() in [genre.lower() for genre in genres] 
                 and preferred_platform.lower() in [platform.lower() for platform in platforms]
+                and (preferred_publisher.lower() == '' or preferred_publisher.lower() in [publisher.lower() for publisher in publishers])
                 and int(game["Metrics.Review Score"]) >= min_score):
                 recommended_games.append(game)
     except KeyError:
@@ -70,9 +73,11 @@ def main():
     try:
         genre = input("What genre of games do you like? ")
         platform = input("What platform do you play on? ")
-        min_score = int(input("What minimum review score would you like the game to have? "))
+        min_score_input = input("What minimum review score would you like the game to have? (Press Enter to skip)")
+        min_score = int(min_score_input) if min_score_input else 0
+        preferred_publisher = input("Which licensing company do you prefer? (Press Enter to skip)")
 
-        recommended_games = recommend_games(genre, platform, min_score, games)
+        recommended_games = recommend_games(genre, platform, min_score, preferred_publisher, games)
 
         if recommended_games:
             print("Based on your preferences, we recommend the following games:")
