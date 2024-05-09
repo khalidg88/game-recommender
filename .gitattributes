@@ -71,7 +71,8 @@ def main():
         return
 
     try:
-        genre = input("What genre of games do you like? ")
+        genre = input("What genre of games do you like? ") 
+        #Nintendo DS, Nintendo Wii, Sony PSP, X360, Playstation3 are the available options
         platform = input("What platform do you play on? ")
         min_score_input = input("What minimum review score would you like the game to have? (Press Enter to skip)")
         min_score = int(min_score_input) if min_score_input else 0
